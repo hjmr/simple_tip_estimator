@@ -33,8 +33,8 @@ def create_dataset_from_dataframe(tips_data, target_tag="tip"):
     return input, target
 
 
-# 3層順方向ニューラルネットワークモデルの定義
-class ThreeLayerNN(torch.nn.Module):
+# 4層順方向ニューラルネットワークモデルの定義
+class FourLayerNN(torch.nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
         self.l1 = torch.nn.Linear(input_size, hidden_size)
@@ -81,7 +81,7 @@ tips_data = read_data()
 input, target = create_dataset_from_dataframe(tips_data)
 
 # NNのオブジェクトを作成
-nn_model = ThreeLayerNN(input.shape[1], 30, 1)
+nn_model = FourLayerNN(input.shape[1], 30, 1)
 train_model(nn_model, input, target)
 
 # 学習後のモデルの保存

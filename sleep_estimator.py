@@ -5,6 +5,9 @@ import torch
 def read_health_data():
     health_csv = pd.read_csv("Sleep_health_and_lifestyle_dataset.csv", index_col=0, header=0)
 
+    # 読み込んだデータの確認
+    # print(health_csv.head())
+
     # NNで処理できるようにカテゴリカルデータを数値に変換
     health_data = health_csv.copy()
     # カテゴリカルデータを数値に変換
@@ -24,6 +27,10 @@ def read_health_data():
     health_data["Blood Low"] = a[2].astype(float)
     # 分割前の血圧の列を削除
     health_data = health_data.drop("Blood Pressure", axis=1)
+
+    # 変換後のデータの確認
+    # print(health_data.head())
+
     return health_data
 
 
@@ -54,7 +61,7 @@ class FourLayerNN(torch.nn.Module):
 def train_model(nn_model, input, target):
     # データセットの作成
     tips_dataset = torch.utils.data.TensorDataset(input, target)
-    # バッチサイズ=25として学習用データローダを作成
+    # バッチサイズ=50として学習用データローダを作成
     train_loader = torch.utils.data.DataLoader(tips_dataset, batch_size=50, shuffle=True)
 
     # オプティマイザ
@@ -81,7 +88,6 @@ def train_model(nn_model, input, target):
 
 # データの準備
 health_data = read_health_data()
-print(health_data.head())
 input, target = create_dataset_from_dataframe(health_data, target_tag="Quality of Sleep")
 
 # NNのオブジェクトを作成

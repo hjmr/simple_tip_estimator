@@ -5,6 +5,7 @@ import torch
 def read_data() -> pd.DataFrame:
     # データの読み込み
     tips_csv = pd.read_csv("tips.csv", index_col=None, header=0)
+
     # 読み込んだデータの確認
     # print(tips_csv.head())
 

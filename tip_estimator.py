@@ -2,22 +2,22 @@ import pandas as pd
 import torch
 
 
-def read_data():
+def read_data() -> pd.DataFrame:
     # データの読み込み
     tips_csv = pd.read_csv("tips.csv", index_col=None, header=0)
     # 読み込んだデータの確認
     # print(tips_csv.head())
 
-    # NNで処理できるようにデータを変換
-    tips_data = tips_csv.replace(
-        {
-            "sex": {"Male": 0, "Female": 1},
-            "smoker": {"No": 0, "Yes": 1},
-            "time": {"Dinner": 0, "Lunch": 1},
-            "day": {"Sun": 0, "Sat": 1, "Thur": 2, "Fri": 3},
-        }
-    )
+    # NNで処理できるようにカテゴリカルデータを数値に変換
+    tips_data = tips_csv.copy()
+    tips_data["sex"] = tips_data["sex"].map({"Male": 0, "Female": 1})
+    tips_data["smoker"] = tips_data["smoker"].map({"No": 0, "Yes": 1})
+    tips_data["time"] = tips_data["time"].map({"Dinner": 0, "Lunch": 1})
+    tips_data["day"] = tips_data["day"].map({"Sun": 0, "Sat": 1, "Thur": 2, "Fri": 3})
+
+    # 数値の調整
     tips_data["total_bill"] = tips_data["total_bill"] / 10
+
     # 変換後のデータの確認
     # print(tips_data.head())
 
@@ -25,7 +25,9 @@ def read_data():
 
 
 # データをPyTorchでの学習に利用できる形式に変換
-def create_dataset_from_dataframe(tips_data, target_tag="tip"):
+def create_dataset_from_dataframe(
+    tips_data: pd.DataFrame, target_tag: str = "tip"
+) -> tuple[torch.Tensor, torch.Tensor]:
     # "tip"の列を目的にする
     target = torch.tensor(tips_data[target_tag].values, dtype=torch.float32).reshape(-1, 1)
     # "tip"以外の列を入力にする
@@ -35,20 +37,20 @@ def create_dataset_from_dataframe(tips_data, target_tag="tip"):
 
 # 4層順方向ニューラルネットワークモデルの定義
 class FourLayerNN(torch.nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
+    def __init__(self, input_size: int, hidden_size: int, output_size: int) -> None:
         super().__init__()
         self.l1 = torch.nn.Linear(input_size, hidden_size)
         self.l2 = torch.nn.Linear(hidden_size, hidden_size)
         self.l3 = torch.nn.Linear(hidden_size, output_size)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         h1 = torch.tanh(self.l1(x))
         h2 = torch.tanh(self.l2(h1))
         o = self.l3(h2)
         return o
 
 
-def train_model(nn_model, input, target):
+def train_model(nn_model: FourLayerNN, input: torch.Tensor, target: torch.Tensor) -> None:
     # データセットの作成
     tips_dataset = torch.utils.data.TensorDataset(input, target)
     # バッチサイズ=25として学習用データローダを作成

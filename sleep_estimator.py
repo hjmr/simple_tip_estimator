@@ -4,17 +4,25 @@ import torch
 
 def read_health_data():
     health_csv = pd.read_csv("Sleep_health_and_lifestyle_dataset.csv", index_col=0, header=0)
-    health_data = health_csv.replace(
-        {
-            "Gender": {"Male": 0, "Female": 1},
-            "BMI Category": {"Normal": 0, "Normal Weight": 0, "Overweight": 1, "Obese": 2},
-            "Sleep Disorder": {None: 0, "Sleep Apnea": 1, "Insomnia": 2},
-        }
+
+    # NNで処理できるようにカテゴリカルデータを数値に変換
+    health_data = health_csv.copy()
+    # カテゴリカルデータを数値に変換
+    health_data["Gender"] = health_data["Gender"].map({"Male": 0, "Female": 1})
+    health_data["BMI Category"] = health_data["BMI Category"].map(
+        {"Normal": 0, "Normal Weight": 0, "Overweight": 1, "Obese": 2}
     )
+    # Sleep Disorderのnan(None)を"None"の文字列に置き換え
+    health_data["Sleep Disorder"] = health_data["Sleep Disorder"].fillna("None")
+    # Sleep Disorderを数値に変換
+    health_data["Sleep Disorder"] = health_data["Sleep Disorder"].map({"None": 0, "Sleep Apnea": 1, "Insomnia": 2})
+    # 不要な列を削除
     health_data = health_data.drop("Occupation", axis=1)
+    # 血圧の上下を分ける
     a = health_data["Blood Pressure"].str.partition("/")
     health_data["Blood High"] = a[0].astype(float)
     health_data["Blood Low"] = a[2].astype(float)
+    # 分割前の血圧の列を削除
     health_data = health_data.drop("Blood Pressure", axis=1)
     return health_data
 

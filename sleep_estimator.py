@@ -7,7 +7,7 @@ def read_health_data():
     health_data = health_csv.replace(
         {
             "Gender": {"Male": 0, "Female": 1},
-            "BMI Category": {"Normal": 0, "Normal Weight": 1, "Overweight": 2, "Obese": 3},
+            "BMI Category": {"Normal": 0, "Normal Weight": 0, "Overweight": 1, "Obese": 2},
             "Sleep Disorder": {None: 0, "Sleep Apnea": 1, "Insomnia": 2},
         }
     )
@@ -47,10 +47,10 @@ def train_model(nn_model, input, target):
     # データセットの作成
     tips_dataset = torch.utils.data.TensorDataset(input, target)
     # バッチサイズ=25として学習用データローダを作成
-    train_loader = torch.utils.data.DataLoader(tips_dataset, batch_size=25, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(tips_dataset, batch_size=50, shuffle=True)
 
     # オプティマイザ
-    optimizer = torch.optim.SGD(nn_model.parameters(), lr=1e-10, momentum=0.9)
+    optimizer = torch.optim.SGD(nn_model.parameters(), lr=1e-14, momentum=0.9)
 
     # データセット全体に対して10000回学習
     for epoch in range(10000):
@@ -87,18 +87,20 @@ train_model(nn_model, input, target)
 test_data = torch.tensor(
     [
         [
-            0,  # Male
+            0,  # 0:Male, 1:Female
             29,  # Age
             6.3,  # Sleep Duration
             40,  # Physical Activity
             7,  # Stress Level
-            3,  # BMI
+            2,  # BMI 0:Normal 0:Normal Weight 1:Overweight 2:Obese
             140,  # Blood High
             90,  # Blood Low
             82,  # Heart Rate
             3500,  # Steps
-            2,  # Sleep Disorder
-        ]
+            2,  # Sleep Disorder 0:None 1:Sleep Apnea 2:Insomnia
+        ],
+        [1, 34, 5.8, 32, 8, 1, 131, 86, 81, 5200, 1],
+        [1, 52, 8.4, 30, 3, 0, 125, 80, 65, 5000, 0],
     ],
     dtype=torch.float32,
 )
